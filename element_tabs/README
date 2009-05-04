@@ -1,0 +1,26 @@
+This code is written by Andreas Stenius <git@astekk.se>.
+The easiest way to get this into your nitrogen code base is probably to pull it from
+git://github.com/kaos/nitrogen.git
+http://github.com/kaos/nitrogen/tree/master
+
+I'm no git expert (yet), so I'll leave the details of how to pull this as an excercise for the reader.
+
+Please examine the diff.patch file for info about which file goes were in the nitrogen directory
+hierarchy.
+
+You should be able to apply all changes "out-of-the-box" with 
+(as hinted by: http://www-cs-students.stanford.edu/~blynn/gitmagic/ch06.html#_patches_the_global_currency )
+
+$ git apply < diff.patch
+
+(I've not tried this myself, please don't blame me if it screws up your working repo).
+
+I ran:
+
+$ git diff 924ce8ab2ed24221f78f77b52c97cb3a35980b7b..HEAD > diff.patch
+
+to generate the file.
+
+Any trouble with this, feel free to give me a shout (at github, user kaos, or by e-mail: git@astekk.se).
+
+--Andreas

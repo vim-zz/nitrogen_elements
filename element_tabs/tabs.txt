@@ -1,0 +1,47 @@
+[
+
+{title, "Tabs Element"},
+
+{see_also, [base]},
+
+{usage, "
+#tabs{
+	tag=tabsTag,
+	options=[
+		{collapsible, true},
+		{selected, 2},
+		{event, mouseover}
+	],
+	tabs=[
+		#tab{ tag=tabTag, title=\"Tab 1\", body=[\"Tab one body...\"] },
+ 		#tab{ title=\"Tab 2\", body=#panel{ body=[\"Tab two body...\"] }},
+ 		#tab{ title=#span{ text=\"<Tab 3>\" },
+		      url=\"some/path/to-tab-data\",
+		      body=\"This body will be replaced by data from ajax call to above url.\" }
+ 	]}
+"},
+
+{description, "The tabs element produces an jQuery UI tabs pane."},
+
+{attributes, [
+	     
+	{"tag", "Erlang term", "Tag used in event postbacks. Note: no events will be sent if tag is omitted."},
+	{"options", "list", "To Be Written. See jQuery UI docs: http://jqueryui.com/demos/tabs/"},
+	{"tabs", "list of tab elements", "Each tab should have a title and a body. If url is present, then the body is loaded from that url with ajax."}
+]},
+
+{events, [
+
+	{"tabs_event(Type, TabsTag, TabTag, TabIndex)", "
+ 	Called when a tab is selected, loaded, enabled, disabled, added, removed or shown.<br>
+	The Event provided is a tuple with event kind and the tag of the tabs pane.
+
+	<p>
+	Type is one of: tabsselect, tabsload, tabsshow, tabsadd, tabsremove, tabsenable, tabsdisable.<br>
+	Tag is the attribute provided for the tabs and tab elements respectively. 
+	The event will not be triggered if the tabs tag is undefined.
+
+	"}
+]}
+
+].

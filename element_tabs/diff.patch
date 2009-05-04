@@ -1,0 +1,550 @@
+diff --git a/.gitignore b/.gitignore
+index 0d94ff3..0067a2e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,4 +1,6 @@
+ *.dump
+ .DS_Store
+ http_servers
+-coverage
+\ No newline at end of file
++coverage
++*~
++\#*\#
+diff --git a/Quickstart/reference/actions/tab.txt b/Quickstart/reference/actions/tab.txt
+new file mode 100644
+index 0000000..a6d2915
+--- /dev/null
++++ b/Quickstart/reference/actions/tab.txt
+@@ -0,0 +1,53 @@
++[
++
++{title, "Tab Actions"},
++
++{see_also, [base]},
++
++{usage, "
++	wf:wire(myTabs, #tab_destroy{})
++	<p>
++	wf:wire(myTabs, #tab_disable{ tab=0 })
++	<p>
++	wf:wire(myTabs, #tab_enable{ tab=0 })
++	<p>
++	wf:wire(myTabs, #tab_select{ tab=3 })
++	<p>
++	wf:wire(myTabs, #tab_option{ key=collapsible, value=true })
++	<p>
++	wf:wire(myTabs, #tab_add{ url=\"?q=tab\", label=\"My New Tab\", index=0 })
++	<p>
++	wf:wire(myTabs, #tab_remove{ tab=2 })
++	<p>
++	wf:wire(myTabs, #tab_rotate{ ms=2000, continuing=true })
++	<p>
++	wf:wire(myTabs, #tab_abort{}) % abort tab rotate
++	<p>
++	wf:wire(myTabs, #tab_load{ tab=4 })
++	<p>
++	wf:wire(myTabs, #tab_url{ tab=1, url=\"new-tab-url\" })
++
++"},
++
++
++{description, "
++	      These actions operate on a tabs pane (#tabs{}) or one of its tabs.
++	      <p>
++	      Notice: Not all attributes apply to all tab actions. See usage above.
++
++"},
++
++{attributes, [
++	{"tab", "integer", "Tab index for actions that operate on a specific tab."},
++	{"url", "string", "A relative or absolute local url. No cross domain."},
++	{"label", "string", "New tab caption."},
++	{"index", "integer", "Optional attribute for #tab_add. Insertion index for new tab. Default add to end of tab list."},
++	{"key", "atom", "A valid option key. See the tabs element documentation."},
++	{"value", "bool, integer, string", "Option value for key."},
++	{"ms", "integer", "Number of milliseconds to stay on each tab while rotating."},
++	{"continuing", "bool", "Optional attribute for #tab_rotate. Default false. If set to true, rotate will continue even after the user has selected a tab."}
++]},
++
++{events, []}
++
++].
+diff --git a/Quickstart/reference/elements/link.txt b/Quickstart/reference/elements/link.txt
+index c9e74c8..c30d6af 100644
+--- a/Quickstart/reference/elements/link.txt
++++ b/Quickstart/reference/elements/link.txt
+@@ -21,6 +21,8 @@
+ {attributes, [
+ 
+ 	{"text", "string", "The text to display."},
++
++	{"title", "string", "The title for this link. Not rendered on screen, but may be used for other purposes."},
+ 	
+ 	{"body", "Nitrogen elements", "Instead of text, specify one or more Nitrogen elements (such as an #image) to wrap in a link."},
+ 	
+@@ -32,4 +34,4 @@
+ 
+ ]}
+ 
+-].
+\ No newline at end of file
++].
+diff --git a/Quickstart/reference/elements/tabs.txt b/Quickstart/reference/elements/tabs.txt
+new file mode 100644
+index 0000000..37278f8
+--- /dev/null
++++ b/Quickstart/reference/elements/tabs.txt
+@@ -0,0 +1,47 @@
++[
++
++{title, "Tabs Element"},
++
++{see_also, [base]},
++
++{usage, "
++#tabs{
++	tag=tabsTag,
++	options=[
++		{collapsible, true},
++		{selected, 2},
++		{event, mouseover}
++	],
++	tabs=[
++		#tab{ tag=tabTag, title=\"Tab 1\", body=[\"Tab one body...\"] },
++ 		#tab{ title=\"Tab 2\", body=#panel{ body=[\"Tab two body...\"] }},
++ 		#tab{ title=#span{ text=\"<Tab 3>\" },
++		      url=\"some/path/to-tab-data\",
++		      body=\"This body will be replaced by data from ajax call to above url.\" }
++ 	]}
++"},
++
++{description, "The tabs element produces an jQuery UI tabs pane."},
++
++{attributes, [
++	     
++	{"tag", "Erlang term", "Tag used in event postbacks. Note: no events will be sent if tag is omitted."},
++	{"options", "list", "To Be Written. See jQuery UI docs: http://jqueryui.com/demos/tabs/"},
++	{"tabs", "list of tab elements", "Each tab should have a title and a body. If url is present, then the body is loaded from that url with ajax."}
++]},
++
++{events, [
++
++	{"tabs_event(Type, TabsTag, TabTag, TabIndex)", "
++ 	Called when a tab is selected, loaded, enabled, disabled, added, removed or shown.<br>
++	The Event provided is a tuple with event kind and the tag of the tabs pane.
++
++	<p>
++	Type is one of: tabsselect, tabsload, tabsshow, tabsadd, tabsremove, tabsenable, tabsdisable.<br>
++	Tag is the attribute provided for the tabs and tab elements respectively. 
++	The event will not be triggered if the tabs tag is undefined.
++
++	"}
++]}
++
++].
+diff --git a/Quickstart/src/reference/web_reference_actions.erl b/Quickstart/src/reference/web_reference_actions.erl
+index 05b526c..6c6ca6b 100644
+--- a/Quickstart/src/reference/web_reference_actions.erl
++++ b/Quickstart/src/reference/web_reference_actions.erl
+@@ -59,7 +59,8 @@ column2() ->
+ 		{ "/web/reference/actions/base", "(Base Action)" },
+ 		{ "/web/reference/actions/event", "Event" },
+ 		{ "/web/reference/actions/script", "Script" },
+-		{ "/web/reference/actions/validate", "Validate" }
++		{ "/web/reference/actions/validate", "Validate" },
++		{ "/web/reference/actions/tab", "Tabs" }
+ 	],
+ 	
+ 	[
+@@ -129,4 +130,4 @@ read_file(Directory, File, Ext) ->
+ trim(Value) -> lists:reverse(trim1(lists:reverse(trim1(Value)))).
+ trim1([]) -> [];
+ trim1([H|T]) when H==$\s orelse H==$\t orelse H==$\n -> trim1(T);
+-trim1([H|T]) -> [H|T].
+\ No newline at end of file
++trim1([H|T]) -> [H|T].
+diff --git a/Quickstart/src/reference/web_reference_elements.erl b/Quickstart/src/reference/web_reference_elements.erl
+index 028b83a..a683af0 100644
+--- a/Quickstart/src/reference/web_reference_elements.erl
++++ b/Quickstart/src/reference/web_reference_elements.erl
+@@ -38,7 +38,8 @@ column1() ->
+ 		{ "/web/reference/elements/rounded_panel", "Rounded Panel" },
+ 		{ "/web/reference/elements/span", "Span" },
+ 		{ "/web/reference/elements/lightbox", "Lightbox" },
+-		{ "/web/reference/elements/wizard", "Wizard" }
++		{ "/web/reference/elements/wizard", "Wizard" },
++		{ "/web/reference/elements/tabs", "Tabs Pane" }
+ 	],
+ 	
+ 	Tables = [
+@@ -60,7 +61,7 @@ column1() ->
+ 		{ "/web/reference/elements/droppable", "Droppable" },
+ 		{ "/web/reference/elements/sortblock", "Sort Block" },
+ 		{ "/web/reference/elements/sortitem", "Sort Item" },
+-        { "/web/reference/elements/gravatar", "Gravatar"}
++		{ "/web/reference/elements/gravatar", "Gravatar"}
+ 	],
+ 	
+ 	[
+@@ -169,4 +170,4 @@ read_file(Directory, File, Ext) ->
+ trim(Value) -> lists:reverse(trim1(lists:reverse(trim1(Value)))).
+ trim1([]) -> [];
+ trim1([H|T]) when H==$\s orelse H==$\t orelse H==$\n -> trim1(T);
+-trim1([H|T]) -> [H|T].
+\ No newline at end of file
++trim1([H|T]) -> [H|T].
+diff --git a/Quickstart/src/samples/web_samples.erl b/Quickstart/src/samples/web_samples.erl
+index fed46b2..ffea4b0 100644
+--- a/Quickstart/src/samples/web_samples.erl
++++ b/Quickstart/src/samples/web_samples.erl
+@@ -26,7 +26,8 @@ column1() -> [
+ 	#link { text="Effects", url="/web/samples/effects" }, #br{}, 
+ 	#link { text="Drag and Drop", url="/web/samples/dragdrop" }, #br{}, 
+ 	#link { text="Sorting", url="/web/samples/sorting1" }, #br{}, 
+-	#link { text="Nested Sorting", url="/web/samples/sorting2" }, #br{}
++	#link { text="Nested Sorting", url="/web/samples/sorting2" }, #br{},
++	#link { text="Tabs Pane", url="/web/samples/tabs" }, #br{}
+ ].
+ 
+ column2() -> [
+@@ -57,4 +58,4 @@ event(go) ->
+ 	wf:flash("Hello there"),
+ 	wf:update(test, "This is a test.");
+ 	
+-event(_) -> ok.
+\ No newline at end of file
++event(_) -> ok.
+diff --git a/Quickstart/src/samples/web_samples_tabs.erl b/Quickstart/src/samples/web_samples_tabs.erl
+new file mode 100644
+index 0000000..7417eaf
+--- /dev/null
++++ b/Quickstart/src/samples/web_samples_tabs.erl
+@@ -0,0 +1,28 @@
++-module (web_samples_tabs).
++-include ("wf.inc").
++-compile(export_all).
++
++main() -> #template { file="./wwwroot/onecolumn.html", bindings=[
++	{'Group', learn},
++	{'Item', samples}
++]}.
++
++title() -> "Tabs Pane Example".
++headline() -> "Tabs Pane Example".
++right() -> linecount:render().
++
++body() -> [
++     #tabs{ tag=tabsTag,
++	    options=[ {collapsible, true} ],
++	    tabs=[
++		  #tab{ tag=tabTag, title="Tab 1", body=["Tab one body..."] },
++		  #tab{ title="Tab 2", body=#panel{ body=["Tab two body..."] }},
++		  #tab{ title=[" ", #span{ text="<Tab 3>" }, " "], 
++			body="Tab three body..." }
++		  ]}
++].
++	
++event(_) -> ok.
++
++tabs_event(_Evt, _TabsTag, _TabTag, _Index) ->
++    ok.
+diff --git a/Quickstart/wwwroot/css/style.css b/Quickstart/wwwroot/css/style.css
+index 6b77df5..5b7a13c 100644
+--- a/Quickstart/wwwroot/css/style.css
++++ b/Quickstart/wwwroot/css/style.css
+@@ -110,6 +110,9 @@ a:hover { color: #E35; text-decoration: underline; }
+ .content .column1 { width: 47%; margin-right: 3%; float: left; }
+ .content .column2 { width: 47%; float: left; }
+ 
++.tabs ul li { list-style-type: none; }
++
++
+ /*** FOOTER ***/
+ 
+ .footer { 
+diff --git a/include/wf.inc b/include/wf.inc
+index a6a7157..e147740 100644
+--- a/include/wf.inc
++++ b/include/wf.inc
+@@ -34,7 +34,7 @@
+ -record(p, {?ELEMENT_BASE(element_p), body=""}).
+ -record(label, {?ELEMENT_BASE(element_label), text="", html_encode=true}).
+ -record(value, {?ELEMENT_BASE(element_value), text="", html_encode=true}).
+--record(link, {?ELEMENT_BASE(element_link), text="", body="", html_encode=true, url="javascript:", postback}).
++-record(link, {?ELEMENT_BASE(element_link), text="", title="", body="", html_encode=true, url="javascript:", postback}).
+ -record(error, {?ELEMENT_BASE(element_error), text="", html_encode=true}).
+ -record(span, {?ELEMENT_BASE(element_span), text="", html_encode=true}).
+ -record(button, {?ELEMENT_BASE(element_button), text="Button", html_encode=true, postback}).
+@@ -68,6 +68,9 @@
+ -record(draggable, {?ELEMENT_BASE(element_draggable), tag, body=[], group, handle, clone=true, revert=true}).
+ -record(droppable, {?ELEMENT_BASE(element_droppable), tag, body=[], accept_groups=all, active_class=active, hover_class=hover}).
+ -record(gravatar, {?ELEMENT_BASE(element_gravatar), email="", size="80", rating="g", default=""}).
++-record(tabs, {?ELEMENT_BASE(element_tabs), tabs=[], options=[], tag}).
++-record(tab, {id=wf:temp_id(), title="No Title", body=[], tag, url}).
++
+ 
+ %%% Controls %%%
+ -define(CONTROL_BASE(Module), ?ELEMENT_BASE(Module), tag).
+@@ -97,6 +100,18 @@
+ -record(animate, {?ACTION_BASE(action_animate), options=[], speed=500, easing=swing}).
+ -record(buttonize, {?ACTION_BASE(action_buttonize)}).
+ -record(comet_start, {?ACTION_BASE(action_comet_start)}).
++-record(tab_destroy, {?ACTION_BASE(action_tabs_methods)}).
++-record(tab_disable, {?ACTION_BASE(action_tabs_methods), tab=-1}).
++-record(tab_enable, {?ACTION_BASE(action_tabs_methods), tab=-1}).
++-record(tab_option, {?ACTION_BASE(action_tabs_methods), key, value}).
++-record(tab_add, {?ACTION_BASE(action_tabs_methods), url, label, index}).
++-record(tab_remove, {?ACTION_BASE(action_tabs_methods), tab}).
++-record(tab_select, {?ACTION_BASE(action_tabs_methods), tab}).
++-record(tab_load, {?ACTION_BASE(action_tabs_methods), tab}).
++-record(tab_url, {?ACTION_BASE(action_tabs_methods), tab, url}).
++%-record(tab_length, {?ACTION_BASE(action_tabs_methods)}).
++-record(tab_abort, {?ACTION_BASE(action_tabs_methods)}).
++-record(tab_rotate, {?ACTION_BASE(action_tabs_methods), ms, continuing=false}).
+ 
+ %%% Validators %%%
+ -define(VALIDATOR_BASE(Module), module=Module, text="Failed.").
+diff --git a/src/actions/action_tabs_methods.erl b/src/actions/action_tabs_methods.erl
+new file mode 100644
+index 0000000..15b8b44
+--- /dev/null
++++ b/src/actions/action_tabs_methods.erl
+@@ -0,0 +1,60 @@
++% Nitrogen Web Framework for Erlang
++% Copyright (c) 2009 Andreas Stenius
++% See MIT-LICENSE for licensing information.
++
++-module(action_tabs_methods).
++-include("wf.inc").
++-compile(export_all).
++
++render_action(_TriggerPath, TargetPath, Record) ->
++    Script = case element(1, Record) of
++		 tab_destroy -> "'destroy'";
++		 tab_disable ->
++		     "'disable'" ++
++			 case Record#tab_disable.tab of
++			     -1 -> "";
++			     Idx -> wf:f(", ~w", [Idx])
++			 end;
++		 tab_enable ->
++		     "'enable'" ++
++			 case Record#tab_enable.tab of
++			     -1 -> "";
++			     Idx -> wf:f(", ~w", [Idx])
++			 end;
++		 tab_option ->
++		     wf:f("'option', '~s', ~s",
++			  [Record#tab_option.key,
++			   value_to_js(Record#tab_option.value)]);
++		 tab_add ->
++		     wf:f("'add', '~s', '~s'",
++			  [Record#tab_add.url, Record#tab_add.label])
++			 ++
++			 case Record#tab_add.index of
++			     undefined -> "";
++			     Idx -> wf:f(", ~w", [Idx])
++			 end;
++		 tab_remove ->
++		     wf:f("'remove', ~w", [Record#tab_remove.tab]);
++		 tab_select ->
++		     wf:f("'select', ~w", [Record#tab_select.tab]);
++		 tab_load -> wf:f("'load', ~w", [Record#tab_load.tab]);
++		 tab_url ->
++		     wf:f("'url', ~w, '~s'",
++			  [Record#tab_url.tab, Record#tab_url.url]);
++		 tab_abort -> "'abort'";
++		 tab_rotate ->
++		     wf:f("'rotate', ~w, ~s",
++			  [Record#tab_rotate.ms, Record#tab_rotate.continuing])
++	     end,
++    [wf:me_var(),
++     wf:f("jQuery(obj('~s')).tabs(~s);",
++	  [wf:to_js_id(TargetPath), Script])].
++
++value_to_js(Value) when is_list(Value) ->
++    wf:f("'~s'", [wf_utils:js_escape(Value)]);
++value_to_js(Value) when Value == true; Value == false ->
++    wf:f("~s", [Value]);
++value_to_js(Value) when is_atom(Value) ->
++    wf:f("'~s'", [Value]);
++value_to_js(Value) -> wf:f("~p", [Value]).
++
+diff --git a/src/elements/html/element_link.erl b/src/elements/html/element_link.erl
+index d8ddbd8..b5ed627 100644
+--- a/src/elements/html/element_link.erl
++++ b/src/elements/html/element_link.erl
+@@ -23,5 +23,6 @@ render(ControlID, Record) ->
+ 		{id, ControlID},
+ 		{href, Record#link.url},
+ 		{class, [link, Record#link.class]},
+-		{style, Record#link.style}
+-	]).
+\ No newline at end of file
++		{style, Record#link.style},
++		{title, wf:html_encode(Record#link.title, Record#link.html_encode)}
++	]).
+diff --git a/src/elements/layout/element_tabs.erl b/src/elements/layout/element_tabs.erl
+index c039ea3..2554eed 100644
+--- a/src/elements/layout/element_tabs.erl
++++ b/src/elements/layout/element_tabs.erl
+@@ -9,30 +9,57 @@
+ reflect() -> record_info(fields, tabs).
+ 
+ render(ControlID, Record) -> 
++    PickledPostBackInfo = case Record#tabs.tag of
++			      undefined -> "false";
++			      Tag ->
++				  [wf:wire(wf:f(
++					    "Nitrogen.$tab(obj('~s'), '~s')",
++					     [R#tab.id, wf_utils:pickle(R#tab.tag)]))
++				   || R <- [#tab{ id=ControlID, tag=Record#tabs.tag }
++					    |Record#tabs.tabs], R#tab.tag /= undefined],
++				  
++				  wf:f("'~s'",
++				       [action_event:make_postback_info(
++					  Tag, tabsevent,
++					  ControlID, ControlID,
++					  ?MODULE)
++				       ])
++			  end,
++    
+     Options = action_jquery_effect:options_to_js(
+ 		Record#tabs.options),
+-    Script = wf:f("Nitrogen.$tabs(obj('~s'), ~s);",
+-		  [ControlID, Options]),
++    
++    Script = wf:f("Nitrogen.$tabs(obj('~s'), ~s, ~s)",
++		  [ControlID, Options, PickledPostBackInfo]),
+ 
+     wf:wire(Script),
+-
++    
+     Terms = #panel{
+       class = "tabs " ++ wf:to_list(Record#tabs.class),
+       style = Record#tabs.style,
+-      body = ["<ul>"]
+-      ++ [[wf:f("<li><a href='#~s'>", [html_id(Tab#tab.id)]),
+-	   Tab#tab.title,
+-	   "</a></li>"]
+-	  || Tab <- Record#tabs.tabs]
+-      ++ ["</ul>"]
+-      ++ [#panel{ id = Tab#tab.id,
+-		  class = "tab",
+-		  body = Tab#tab.body } 
+-	  || Tab <- Record#tabs.tabs]
++      body = [
++	      #list{ body=[
++			   #listitem{ body=tab_link(Tab) }
++			   || Tab <- Record#tabs.tabs ] },
++	      [#panel{ id = Tab#tab.id,
++		       class = "tab",
++		       body = Tab#tab.body } 
++	       || Tab <- Record#tabs.tabs]
++	     ]
+      },
+     
+     element_panel:render(ControlID, Terms).
+ 
++event(TabsTag) ->
++    [EventStr] = wf:q(event),
++    [IndexStr] = wf:q(tab_index),
++    [TabItem] = wf:q(tab_tag),
++    Event = list_to_atom(EventStr),
++    Index = list_to_integer(IndexStr),
++    TabTag = wf:depickle(TabItem),
++    Module = wf_platform:get_page_module(),
++    Module:tabs_event(Event, TabsTag, TabTag, Index).
++
+ html_id(Id) ->
+     case wf_path:is_temp_element(Id) of
+ 	true ->
+@@ -43,3 +70,8 @@ html_id(Id) ->
+ 	    wf_path:pop_path(),
+ 	    HtmlId
+     end.
++
++tab_link(#tab{ url=undefined, id=Id, title=Title }) ->
++    #link{ url="#" ++ html_id(Id), body=Title };
++tab_link(#tab{ url=Url, id=Id, title=Title }) ->
++    #link{ url=Url, title=html_id(Id), body=Title }.
+diff --git a/test/src/elements/html/element_link_test.erl b/test/src/elements/html/element_link_test.erl
+index fc07f5c..641296b 100644
+--- a/test/src/elements/html/element_link_test.erl
++++ b/test/src/elements/html/element_link_test.erl
+@@ -34,6 +34,6 @@ basic_test_() ->
+    ?_assert(eunit_helper:regexpMatch("<a id='4' href='javascript:' class='link'><img id='.*?' class='image' src='/path/to/image.gif'/></a>",
+                                      new_link_4())),
+    ?_assertEqual("<a id='5' href='not_javascript' class='link'>LINK&nbsp;TEXTA LINK BODY</a>", new_link_5()),
+-   ?_assertEqual([module,id,actions,show_if,class,style,text,body, html_encode,url,postback],
++   ?_assertEqual([module,id,actions,show_if,class,style,text,title,body,html_encode,url,postback],
+ 	 element_link:reflect())
+   ].
+diff --git a/www/elements.css b/www/elements.css
+index eead389..7106aeb 100644
+--- a/www/elements.css
++++ b/www/elements.css
+@@ -140,4 +140,12 @@ input.LV_invalid_field:active,
+ textarea.LV_invalid_field:hover, 
+ textarea.LV_invalid_field:active {
+     border: 1px solid #CC0000;
+-}*/
+\ No newline at end of file
++}*/
++
++
++/*** TABS ***/
++
++.ui-tabs .ui-tabs-hide {
++     display: none;
++}
++
+diff --git a/www/nitrogen.js b/www/nitrogen.js
+index 6c0885a..53c59bc 100644
+--- a/www/nitrogen.js
++++ b/www/nitrogen.js
+@@ -456,5 +456,43 @@ N.$sortblock = function(sortBlock, sortOptions, sortPostbackInfo) {
+ }
+ 
+ 
++/*** TABS ***/
++
++N.$tab = function(tabObj, tabTag) {
++    tabObj.$tab_tag = tabTag;
++}
++
++N.$tabs = function(tabsObj, tabsOptions, tabsPostbackInfo) {
++    if (tabsPostbackInfo)
++    {
++	var n = Nitrogen.$lookup(Nitrogen.$current_id);
++	var evt_fun = function(ev, ui) {
++	    var tag;
++	    if (ui.index >= 0) {
++		tag = ui.panel.$tab_tag;
++	    } else {
++		tag = tabsObj.$tab_tag;
++	    }
++	    
++	    n.$queue_event(this.id, tabsPostbackInfo, 
++			   "event=" + ev.type +
++			   "&tab_index=" + ui.index +
++			   "&tab_tag=" + tag);
++	}
++
++	tabsOptions.select = evt_fun;
++	tabsOptions.load = evt_fun;
++	tabsOptions.show = evt_fun;
++	tabsOptions.add = evt_fun;
++	tabsOptions.remove = evt_fun;
++	tabsOptions.enable = evt_fun;
++	tabsOptions.disable = evt_fun;
++    }
++
++    jQuery(tabsObj).tabs(tabsOptions);
++}
++
++
++
+ Nitrogen.$event_loop();
+ Nitrogen.Page({ id : 'page' });
