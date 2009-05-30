@@ -16,5 +16,5 @@ render(ControlID, Record) ->
 		{class, [textarea, Record#textarea_x.class]},
 		{style, Record#textarea_x.style},
 		{rows, Record#textarea_x.rows},
-		{columns, Record#textarea_x.columns}
+		{cols, Record#textarea_x.columns}
 	]).
