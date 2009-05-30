@@ -1,8 +1,8 @@
 -module(element_textarea_x).
 -compile(export_all).
 
--include_lib("lib/nitrogen/include/wf.inc").
--record(textarea_x, {?ELEMENT_BASE(element_textarea_x), text="", html_encode=true, rows=2, columns=20}).
+-include("nitrogen_elements.hrl").
+%% -record(textarea_x, {?ELEMENT_BASE(element_textarea_x), text="", html_encode=true, rows=2, columns=20}).
 
 % desc: enhance the basic textarea with inline cols/rows values
 

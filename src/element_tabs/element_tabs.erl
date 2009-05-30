@@ -3,7 +3,7 @@
 % See MIT-LICENSE for licensing information.
 
 -module (element_tabs).
--include ("wf.inc").
+-include ("nitrogen_elements.hrl").
 -compile(export_all).
 
 reflect() -> record_info(fields, tabs).

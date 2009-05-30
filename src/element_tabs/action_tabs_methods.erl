@@ -3,7 +3,7 @@
 % See MIT-LICENSE for licensing information.
 
 -module(action_tabs_methods).
--include("wf.inc").
+-include("nitrogen_elements.hrl").
 -compile(export_all).
 
 render_action(_TriggerPath, TargetPath, Record) ->

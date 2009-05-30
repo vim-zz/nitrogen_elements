@@ -1,8 +1,8 @@
 -module(element_force_reload_on_back_button).
 -compile(export_all).
 
--include_lib("lib/nitrogen/include/wf.inc").
--record(force_reload_on_back_button, {?ELEMENT_BASE(element_force_reload_on_back_button)}).
+-include("nitrogen_elements.hrl").
+% -record(force_reload_on_back_button, {?ELEMENT_BASE(element_force_reload_on_back_button)}).
 
 reflect() -> record_info(fields, force_reload_on_back_button).
 

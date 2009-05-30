@@ -1,8 +1,8 @@
 -module(element_image_x).
 -compile(export_all).
 
--include_lib("lib/nitrogen/include/wf.inc").
--record(image_x, {?ELEMENT_BASE(element_image_x), image, alt, width, height, usemap}).
+-include("nitrogen_elements.hrl").
+%% -record(image_x, {?ELEMENT_BASE(element_image_x), image, alt, width, height, usemap}).
 
 % desc: this enhance the basic image element, mostly for using 'usemap' tag
 % it also allow adding inline width/height to the iamge
