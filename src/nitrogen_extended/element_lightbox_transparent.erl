@@ -1,12 +1,15 @@
 -module (element_lightbox_transparent).
 
--include_lib("eunit/include/eunit.hrl").
--include("dinamo_wf.hrl").
--include("dinamo.hrl").
+-include_lib("nitrogen/include/wf.inc").
+-include("nitrogen_elements.hrl").
+
+%-include_lib("eunit/include/eunit.hrl").
+%-include("dinamo_wf.hrl").
+%-include("dinamo.hrl").
 
 -compile(export_all).
 
--record(lightbox_transparent, {?ELEMENT_BASE(element_lightbox_transparent), body="" }).
+%-record(lightbox_transparent, {?ELEMENT_BASE(element_lightbox_transparent), body="" }).
 
 % desc: the same as basic lightbox, but with transparent background
 

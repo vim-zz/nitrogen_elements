@@ -1,4 +1,6 @@
 -module (web_samples_tabs).
+-ifdef(samples).
+
 -include ("wf.inc").
 -compile(export_all).
 
@@ -26,3 +28,6 @@ event(_) -> ok.
 
 tabs_event(_Evt, _TabsTag, _TabTag, _Index) ->
     ok.
+
+-endif.
+

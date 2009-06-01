@@ -74,4 +74,5 @@ html_id(Id) ->
 tab_link(#tab{ url=undefined, id=Id, title=Title }) ->
     #link{ url="#" ++ html_id(Id), body=Title };
 tab_link(#tab{ url=Url, id=Id, title=Title }) ->
-    #link{ url=Url, title=html_id(Id), body=Title }.
+    %% only needed until nitrogens #link supports the title attribute
+    #link_x{ url=Url, title=html_id(Id), body=Title }.

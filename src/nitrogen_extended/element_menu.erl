@@ -1,8 +1,9 @@
 -module (element_menu).
 -compile(export_all).
 
--include_lib("lib/nitrogen/include/wf.inc").
--record(menu, {?ELEMENT_BASE(element_menu), text="", body=[]}).
+-include_lib("nitrogen/include/wf.inc").
+-include("nitrogen_elements.hrl").
+%-record(menu, {?ELEMENT_BASE(element_menu), text="", body=[]}).
 
 % desc: Provides a collapsable menu. The menu options are specified
 % as listitem elements in the body. 
