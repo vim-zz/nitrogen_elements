@@ -8,7 +8,7 @@ For the time being, these changes needs to be applied manually.
 ## Install nitrogen elements as an Erlang library ##
 
 Run:
-   make
+	make
 
 This should compile all elements and place the beam files in the ebin sub directory. Notice: you need to have nitrogen installed (needs to find the wf.inc file).
 
