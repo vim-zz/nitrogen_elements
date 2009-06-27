@@ -1,4 +1,3 @@
-
 -include_lib("nitrogen/include/wf.inc").
 
 %% Elements
@@ -10,6 +9,7 @@
 -record(tab, {id=wf:temp_id(), title="No Title", body=[], tag, url}).
 -record(menu, {?ELEMENT_BASE(element_menu), text="", body=[]}).
 -record(lightbox_transparent, {?ELEMENT_BASE(element_lightbox_transparent), body="" }).
+ 
 
 %% Actions
 -record(tab_destroy, {?ACTION_BASE(action_tabs_methods)}).
@@ -24,3 +24,4 @@
 %-record(tab_length, {?ACTION_BASE(action_tabs_methods)}).
 -record(tab_abort, {?ACTION_BASE(action_tabs_methods)}).
 -record(tab_rotate, {?ACTION_BASE(action_tabs_methods), ms, continuing=false}).
+-record(dialog, {?ACTION_BASE(action_dialog), body="", width="auto", height="auto", show_cancel=false ,buttons=[]}).
