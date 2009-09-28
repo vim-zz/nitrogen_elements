@@ -13,7 +13,7 @@ Run:
 
 This should compile all elements and place the beam files in the ebin sub directory. Notice: you need to have nitrogen installed (needs to find the wf.inc file).
 
-Add the nitrogen_elements directory to your ERL_LIBS environment variable (or place/clone it to a path already mentioned by ERL_LIBS), then
+Add the nitrogen_elements directory to your ERL_LIBS environment variable (or place/clone it to a path already mentioned by ERL_LIBS), then:
 
     -include_lib("nitrogen_elements/include/nitrogen_elements.hrl").
 
