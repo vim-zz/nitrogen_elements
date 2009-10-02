@@ -5,8 +5,9 @@
 %% This element is only needed until the title attribute is supported by nitrogens #link
 
 -module (element_link_x).
--include ("nitrogen_elements.hrl").
 -compile(export_all).
+
+-include ("nitrogen_elements.hrl").
 
 reflect() -> record_info(fields, link).
 

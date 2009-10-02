@@ -1,11 +1,6 @@
 -module (element_lightbox_transparent).
 
--include_lib("nitrogen/include/wf.inc").
 -include("nitrogen_elements.hrl").
-
-%-include_lib("eunit/include/eunit.hrl").
-%-include("dinamo_wf.hrl").
-%-include("dinamo.hrl").
 
 -compile(export_all).
 

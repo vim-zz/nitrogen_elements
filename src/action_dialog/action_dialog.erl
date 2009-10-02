@@ -22,7 +22,7 @@
 %%%-------------------------------------------------------------------
 -module(action_dialog).
 -export([render_action/3, event/1]).
--include("zinc_elements.hrl").
+-include ("nitrogen_elements.hrl").
 
 render_action(_TriggerPath, _TargetPath, Record) -> 
     Id = wf:temp_id(),

@@ -1,8 +1,7 @@
 -module(element_flot_chart).
 -compile(export_all).
 
--include_lib("nitrogen/include/wf.inc").
--include("elements.hrl").
+-include("nitrogen_elements.hrl").
 
 reflect() -> record_info(fields, flot_chart).
 
